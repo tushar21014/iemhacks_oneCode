@@ -130,9 +130,9 @@ router.post('/findFreeUser', fetchuser, async (req, res) => {
     if (!response)
       return res.json({ message: "No user is available right now" });
 
-    else {  
-      let ress1 = await User.findByIdAndUpdate(userId, { currentConnection: response.socketId,isFree:false });  
-      let ress2 = await User.findByIdAndUpdate(response._id , { currentConnection: currentUser.socketId,isFree:false}); 
+    else {
+      let ress1 = await User.findByIdAndUpdate(userId, { currentConnection: response.socketId, isFree: false });
+      let ress2 = await User.findByIdAndUpdate(response._id, { currentConnection: currentUser.socketId, isFree: false });
       return res.json(response).status(200);
     }
   } catch (error) {
@@ -156,7 +156,7 @@ router.post('/findFreeUser', fetchuser, async (req, res) => {
 router.put("/updateDisconnect", fetchuser, async (req, res) => {
   let userId = req.user;
   try {
-    await User.findByIdAndUpdate(userId, { isFree: false, isOnline: false,isOffline:true });
+    await User.findByIdAndUpdadte(userId, { isFree: false, isOnline: false, isOffline: true });
     res.json({ message: "Disconnected" }).status(200)
   } catch (error) {
     console.log(error);
@@ -164,38 +164,26 @@ router.put("/updateDisconnect", fetchuser, async (req, res) => {
   }
 })
 
-router.put("/connectFriend", fetchuser, async (req, res) => {
-  const userId = req.user._id; // Assuming the fetchuser middleware adds the user object to req.user
-  const secondSocketId = req.body.targetId;
-  
+
+router.post("/makeFriend", fetchuser, async (req, res) => {
+  let userId = req.user;
+  let secondUsersocketId = req.body.current_connection
   try {
-    setTimeout(async () => {
-      const targetUser = await User.findOne({ socketId: secondSocketId });
-
-      if (!targetUser) {
-        res.status(404).json({ message: "Target user not found" });
-        return;
-      }
-
-      // Logic for sending accept/decline options to the targetUser's socket
-
-      // Assuming the targetUser's socket listens for the accept/decline response and triggers the following
-      // if targetUser accepts the request
-      if (accepted) {
-        targetUser.friends.push(userId);
-        await targetUser.save();
-        res.json({ message: "Friend request accepted" });
-      } else {
-        res.json({ message: "Friend request declined" });
-      }
-
-    }, 300000); // 5 minutes in milliseconds
+    const firstUser = await User.findById(userId);
+    const secondUser = await User.findOne({ socketId: secondUsersocketId });
+    let ress = await User.findByIdAndUpdate(userId, { $push: { friends: secondUser._id } }, { new: true });
+    const ress2 = await User.findByIdAndUpdate(secondUser._id, { $push: { friends: firstUser._id } }, { new: true });
+    if (!ress) {
+      res.json({ message: "There is an error" })
+    }
+    if (!ress2) {
+      res.json({ message: "There is an error" })
+    }
+    return res.json({ message: "You are now friends... Enjoy", success: true })
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Error while updating offline status" });
+    console.log(error)
   }
-});
-
+})
 
 
 

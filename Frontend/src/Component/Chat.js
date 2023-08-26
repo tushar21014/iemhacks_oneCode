@@ -3,6 +3,8 @@ import { user } from '../Component/Join';
 import socketIo from 'socket.io-client';
 import Message from './Message';
 
+import Friend from './Friend';
+
 const ENDPOINT = "http://localhost:4500/";
 let socket;
 
@@ -11,8 +13,21 @@ const Chat = () => {
   const [id, setId] = useState("");
   const [targetId, setTargetId] = useState("");
 
+  const [showConnectionRequestPopup, setShowConnectionRequestPopup] = useState(false);
+
+  const sendConnectionRequest = () => {
+    console.log("Sending Connection: ", id)
+    socket.emit('connectionRequest', { targetId, sender: user, socketID: id, authToken: localStorage.getItem('auth-Token') });
+  };
+
+  const handleConnectionAcceptance = () => {
+    socket.emit('acceptConnection', { sender: user });
+  };
+
   const send = () => {
     const message = document.getElementById('chatInput').value;
+    console.log("ID: ", id)
+    console.log("Target ID: ", targetId)
     socket.emit('message', { user, message, id, targetId });
     document.getElementById('chatInput').value = "";
   };
@@ -44,6 +59,7 @@ const Chat = () => {
     });
 
     socket.on('leave', (data) => {
+      socket.emit("disconnection",  localStorage.getItem('auth-Token'))
       setMessages((prevMessages) => [...prevMessages, data]);
       console.log(data.user, data.message);
     });
@@ -74,7 +90,16 @@ const Chat = () => {
       </div>
       <button onClick={send}>Send</button>
       <button onClick={findUser}>Find Someone</button>
-      <button id='connectButton'>Connect</button>
+      <button id='connectButton' onClick={sendConnectionRequest}>Connect</button>
+
+      {showConnectionRequestPopup && (
+        <Friend 
+        onRequestAccept={""}
+        onRequestReject={""}
+        />
+      )
+
+      }
     </div>
   );
 };

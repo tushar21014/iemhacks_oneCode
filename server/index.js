@@ -25,6 +25,26 @@ const io = socketIO(server);
 io.on("connection", (socket) => {
     console.log("New Connection");
 
+    socket.on('connectionRequest', async ({ targetId, sender, socketID, authToken }) => {
+        io.to(targetId).emit('connectionRequestReceived', { sender, socketID });
+
+        let res = await fetch("http://localhost:5004/api/auth/makeFriend", {
+            method: "POST",
+            headers: {
+                "content-type": "application/json",
+                "auth-Token": authToken
+            },
+            body: JSON.stringify({
+                current_connection: targetId,
+                user: sender,
+                socketId: socketID,
+                auth: authToken
+            })
+        })
+        let data = await res.json()
+        console.log(data);
+    });
+
     socket.on('joined', async ({ user, authToken }) => {
         users[socket.id] = user;
         console.log("Current User " + socket.id)
@@ -64,52 +84,25 @@ io.on("connection", (socket) => {
         })
 
         let data = await response.json();
-        console.log("Target User " + data.socketId);
-        // console.log(data)
         socket.emit('matchedUser', data.socketId);
+        io.to(data.socketId).emit('matchedUser', socket.id);
+        console.log("Target User " + data.socketId);
+        console.log("D:", data)
+        // socket.emit('matchedUser', data.socketId);
 
     })
 
 
-   
-//   socket.on('friendRequest', async (data) => {
-//     const { targetSocketId, requestId } = data;
-
-//     try {
-//       const targetUser = await User.findOne({ socketId: targetSocketId });
-
-//       if (!targetUser) {
-//         socket.emit('friendRequestResponse', { message: 'Target user not found' });
-//         return;
-//       }
-
-//       // Emit the request to the target user's socket
-//       io.to(targetSocketId).emit('friendRequestReceived', { requestId });
-
-//       // Listen for the response from the target user
-//       socket.on('friendRequestAction', async (response) => {
-//         if (response.accepted) {
-//           targetUser.friends.push(requestId);
-//           await targetUser.save();
-//           socket.emit('friendRequestResponse', { message: 'Friend request accepted' });
-//         } else {
-//           socket.emit('friendRequestResponse', { message: 'Friend request declined' });
-//         }
-//       });
-//     } catch (error) {
-//       console.log(error);
-//       socket.emit('friendRequestResponse', { message: 'Error while processing request' });
-//     }
-//   });
 
     socket.on('message', ({ message, id, targetId }) => {
+        console.log()
         io.to(targetId).emit('sendMessage', { message, id, targetId });
         io.to(id).emit('sendMessage', { message, targetId, id });
     });
-    
 
 
-    socket.on('disconnect', async (req,res) => {
+
+    socket.on('disconnect', async (req, res) => {
         if (users[socket.id]) {
 
             console.log(`${users[socket.id]} has left`);
@@ -124,7 +117,7 @@ io.on("connection", (socket) => {
         //       "auth-Token": authToken  // Use the stored authToken
         //     }
         //   });
-    
+
         //   if (response.ok) {
         //     res.json({ message: "User Discconnected" });
         //   }
