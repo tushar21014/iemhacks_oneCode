@@ -72,6 +72,36 @@ io.on("connection", (socket) => {
 
 
    
+//   socket.on('friendRequest', async (data) => {
+//     const { targetSocketId, requestId } = data;
+
+//     try {
+//       const targetUser = await User.findOne({ socketId: targetSocketId });
+
+//       if (!targetUser) {
+//         socket.emit('friendRequestResponse', { message: 'Target user not found' });
+//         return;
+//       }
+
+//       // Emit the request to the target user's socket
+//       io.to(targetSocketId).emit('friendRequestReceived', { requestId });
+
+//       // Listen for the response from the target user
+//       socket.on('friendRequestAction', async (response) => {
+//         if (response.accepted) {
+//           targetUser.friends.push(requestId);
+//           await targetUser.save();
+//           socket.emit('friendRequestResponse', { message: 'Friend request accepted' });
+//         } else {
+//           socket.emit('friendRequestResponse', { message: 'Friend request declined' });
+//         }
+//       });
+//     } catch (error) {
+//       console.log(error);
+//       socket.emit('friendRequestResponse', { message: 'Error while processing request' });
+//     }
+//   });
+
     socket.on('message', ({ message, id, targetId }) => {
         io.to(targetId).emit('sendMessage', { message, id, targetId });
         io.to(id).emit('sendMessage', { message, targetId, id });

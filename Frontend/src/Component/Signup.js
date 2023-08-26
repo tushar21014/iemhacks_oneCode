@@ -18,7 +18,7 @@ const Signup = () => {
             });
 
             const json = await response.json();
-            console.log(json);
+            // console.log(json);
             
             if (!json.success) {
                 // alert('Enter Valid Credentials')
@@ -31,17 +31,6 @@ const Signup = () => {
                 // showAlert('success', 'Account Created Successfully')
                 navigate('/')
 
-                // const sendEmail = (e) => {
-                //     // e.preventDefault();
-                //     emailjs.sendForm('service_4pet9at', 'template_t907vp4', form.current, 'p0WJz9TGSvB22SYaG')
-                //       .then((result) => {
-                //           console.log(result.text);
-                //       }, (error) => {
-                //           console.log(error.text);
-                //       });
-                //     }
-                // sendEmail();
-                // alert('Account Created Successfull')
             }
 
 
