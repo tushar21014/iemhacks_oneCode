@@ -117,6 +117,7 @@ router.put('/updateOnlinestatus', fetchuser, async (req, res) => {
 
 router.post('/findFreeUser', fetchuser, async (req, res) => {
   const userId = req.user;
+  const currentUser = await User.findById(userId);
 
   try {
     const response = await User.findOne({
@@ -131,16 +132,7 @@ router.post('/findFreeUser', fetchuser, async (req, res) => {
 
     else {  
       let ress1 = await User.findByIdAndUpdate(userId, { currentConnection: response.socketId,isFree:false });  
-      console.log("I am userId socketId " + userId)
-      let ress2 = await User.findByIdAndUpdate(response._id , { currentConnection: userId.socketId,isFree:false}); 
-      if(!ress1)
-      {
-        console.log(ress1);
-      }
-      if(!ress2)
-      {
-        console.log(ress2);
-      }
+      let ress2 = await User.findByIdAndUpdate(response._id , { currentConnection: currentUser.socketId,isFree:false}); 
       return res.json(response).status(200);
     }
   } catch (error) {
@@ -160,6 +152,7 @@ router.post('/findFreeUser', fetchuser, async (req, res) => {
 //     res.json({ message: "Error while updating offline status" }).status(500);
 //   }
 // })
+
 router.put("/updateDisconnect", fetchuser, async (req, res) => {
   let userId = req.user;
   try {
@@ -170,6 +163,38 @@ router.put("/updateDisconnect", fetchuser, async (req, res) => {
     res.json({ message: "Error while updating offline status" }).status(500);
   }
 })
+
+router.put("/connectFriend", fetchuser, async (req, res) => {
+  const userId = req.user._id; // Assuming the fetchuser middleware adds the user object to req.user
+  const secondSocketId = req.body.targetId;
+  
+  try {
+    setTimeout(async () => {
+      const targetUser = await User.findOne({ socketId: secondSocketId });
+
+      if (!targetUser) {
+        res.status(404).json({ message: "Target user not found" });
+        return;
+      }
+
+      // Logic for sending accept/decline options to the targetUser's socket
+
+      // Assuming the targetUser's socket listens for the accept/decline response and triggers the following
+      // if targetUser accepts the request
+      if (accepted) {
+        targetUser.friends.push(userId);
+        await targetUser.save();
+        res.json({ message: "Friend request accepted" });
+      } else {
+        res.json({ message: "Friend request declined" });
+      }
+
+    }, 300000); // 5 minutes in milliseconds
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error while updating offline status" });
+  }
+});
 
 
 

@@ -37,6 +37,10 @@ const userSchema = new Schema({
     socketId:{
         type:String
     },
+    friends: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User' // Replace 'User' with the actual name of the referenced model
+    }],
     date: {
         type: Date,
         default: Date.now

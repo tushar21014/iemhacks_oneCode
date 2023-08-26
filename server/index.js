@@ -3,6 +3,7 @@ const express = require('express');
 const socketIO = require('socket.io');
 const cors = require('cors');
 const connectToMongo = require('./db');
+const User = require('./Models/User');
 require("dotenv").config()
 
 connectToMongo();
@@ -51,12 +52,10 @@ io.on("connection", (socket) => {
 
 
     });
-    
-    
-    
-    
+
+
     socket.on('findUser', async (authToken) => {
-        const finduser = await fetch('http://localhost:5004/api/auth/findFreeuser', {
+        const response = await fetch('http://localhost:5004/api/auth/findFreeuser', {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json",
@@ -64,41 +63,41 @@ io.on("connection", (socket) => {
             }
         })
 
-        let data = await finduser.json();
+        let data = await response.json();
         console.log("Target User " + data.socketId);
         // console.log(data)
         socket.emit('matchedUser', data.socketId);
-        
+
     })
-    
 
-    // Used For sending message
+
+   
     socket.on('message', ({ message, id, targetId }) => {
-        console.log(id);
-        console.log(targetId);
-        
-        io.to(targetId).emit('sendMessage', { user: users[id], message, id, targetId });
-        io.to(id).emit('sendMessage', { user: users[id], message, targetId, id });
+        io.to(targetId).emit('sendMessage', { message, id, targetId });
+        io.to(id).emit('sendMessage', { message, targetId, id });
     });
-
-    // socket.on('message', ({ message, targetUserId }) => {
-    // Find the target socket ID using the target user ID
-    // const targetSocketId = Object.keys(activeUsers).find(socketId => activeUsers[socketId] === targetUserId);
     
-    //     if (targetUserId) {
-    //         io.to(targetUserId).emit('privateMessage', { user: users[socket.id], message });
-    //     } else {
-    //         // Handle case when target user is not online
-    //     }
-    // });
 
-    socket.on('disconnect', () => {
+
+    socket.on('disconnect', async (req,res) => {
         if (users[socket.id]) {
 
             console.log(`${users[socket.id]} has left`);
             socket.broadcast.emit('leave', { user: `${users[socket.id]}`, message: "Has left the chat" })
             delete users[socket.id];
         }
+
+        // const response = await fetch('http://localhost:5004/api/auth/updateDisconnect', {
+        //     method: 'PUT',
+        //     headers: {
+        //       "Content-Type": "application/json",
+        //       "auth-Token": authToken  // Use the stored authToken
+        //     }
+        //   });
+    
+        //   if (response.ok) {
+        //     res.json({ message: "User Discconnected" });
+        //   }
     });
 
 });

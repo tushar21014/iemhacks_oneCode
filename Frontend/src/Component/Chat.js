@@ -17,6 +17,7 @@ const Chat = () => {
     document.getElementById('chatInput').value = "";
   };
 
+ 
   const findUser = () => {
     socket.emit('findUser', localStorage.getItem('auth-Token'));
   };
@@ -55,7 +56,7 @@ const Chat = () => {
       setTargetId(data);
       console.log("Found a match", data);
     });
-    
+
 
     return () => {
       socket.disconnect();
@@ -73,6 +74,7 @@ const Chat = () => {
       </div>
       <button onClick={send}>Send</button>
       <button onClick={findUser}>Find Someone</button>
+      <button id='connectButton'>Connect</button>
     </div>
   );
 };

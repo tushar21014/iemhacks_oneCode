@@ -1,0 +1,178 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto:500');
+
+body {
+  background-color: rgb(247, 247, 247);
+}
+
+
+
+.login-grandfather-cont {
+  background-image: url('https://static2.bigstockphoto.com/5/4/1/large2/145478384.jpg');
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-container {
+  margin: 8vh auto 8vh auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: auto;
+  width: 25vw;
+  /* margin: auto; */
+  border-radius: 5px;
+  box-shadow: 0px 0px 20px rgb(134, 133, 133);
+  background-color: white;
+}
+
+.login-caption {
+  text-align: left;
+}
+
+:root {
+
+  --white: #fff;
+  --google-blue: #4285f4;
+  --button-active-blue: #1669F2;
+}
+
+.google-btn {
+  cursor: pointer;
+  width: 184px;
+  height: 42px;
+  background-color: var(--google-blue);
+  border-radius: 2px;
+  box-shadow: 0 3px 4px 0 rgba(0, 0, 0, .25);
+}
+
+.google-icon-wrapper {
+  position: absolute;
+  margin-top: 1px;
+  margin-left: 1px;
+  width: 40px;
+  height: 40px;
+  border-radius: 2px;
+  background-color: var(--white);
+}
+
+.google-icon {
+  position: absolute;
+  margin-top: 11px;
+  margin-left: 11px;
+  width: 18px;
+  height: 18px;
+}
+
+.btn-text {
+  float: right;
+  margin: 11px 11px 0 0;
+  color: var(--white);
+  font-size: 14px;
+  letter-spacing: 0.2px;
+  font-family: "Roboto";
+}
+
+.google-btn:hover {
+  box-shadow: 0 0 6px var(--google-blue);
+}
+
+.google-btn:active {
+  background-color: var(--button-active-blue);
+}
+
+.google-cont {
+  display: flex;
+  justify-content: center;
+}
+
+@media only screen and (max-width: 500px) {
+  .login-cap-para {
+    font-size: 13px;
+    /* padding: 13px; */
+  }
+
+  .login-container {
+    width: 66%;
+  }
+
+  .inner-login-container {
+    width: 84%;
+  }
+
+  .btn-text {
+    width: 38vw;
+    margin: 12px auto 0px auto;
+    font-size: 11px;
+    display: flex;
+    justify-content: center
+  }
+
+  .google-icon-wrapper {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media (min-width: 501px) and (max-width: 790px) {
+  .login-container {
+    width: 60%;
+  }
+
+  .inner-login-container {
+    width: 80%;
+  }
+
+  .login-cap-para {
+    font-size: 14px;
+    text-align: center;
+  }
+
+  .btn-text{
+    margin: 12px 4px 0px 0px;
+  }
+}
+
+@media only screen and (min-width: 791px) {
+  .inner-login-container {
+    width: 20vw;
+  }
+}
+
+/* Shared styles for all screen sizes */
+.form-check {
+  display: flex;
+}
+
+@media screen and (max-width: 500px) {
+  /* Styles for screens up to 500px */
+  .form-check {
+    font-size: 12px;
+  }
+
+  .forgotpass{
+    margin-left: 10px;
+  }
+}
+
+@media screen and (min-width: 501px) and (max-width: 768px) {
+  /* Styles for screens between 501px and 768px */
+  .form-check {
+    font-size: 10px;
+  }
+  .forgotpass{
+    margin-left: 24px;
+  }
+}
+
+@media screen and (min-width: 769px) {
+  /* Styles for screens larger than 769px */
+  .form-check {
+    font-size: 15px;
+  }
+
+  .forgotpass{
+    margin-left: 40px;
+  }
+}

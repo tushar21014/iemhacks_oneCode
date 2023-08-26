@@ -1,0 +1,69 @@
+body{
+    background-color: rgb(247,247,247);
+}
+
+.grandfather{
+    background-image: url('https://st2.depositphotos.com/1430176/5430/v/950/depositphotos_54307961-stock-illustration-doodle-food-icons-seamless-background.jpg');
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.form-container{
+    /* margin:8vh auto 8vh auto; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: auto;
+    /* width: 45vw; */
+    /* margin: auto; */
+    border-radius: 5px;
+    box-shadow: 0px 0px 20px rgb(103, 102, 102);
+    background-color: white;
+}
+
+.fields{
+    width: 39vw;
+}
+
+.signupbtn{
+    margin-top: 10px
+}
+
+@media only screen and (max-width: 500px) {
+    .grandfather{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .form-container{
+        width: 70vw;
+    }
+    .fields{
+        width: 58vw;
+    }
+}
+
+@media (min-width: 501px) and (max-width: 769px) {
+    .form-container{
+        width: 70vw;
+    }
+
+    .fields{
+        width: 58vw;
+    }
+    
+}
+
+@media only screen and (min-width: 770px) {
+    .form-container{
+        width: 25%;
+    }
+
+    .fields{
+        width: 80%;
+    }
+}
