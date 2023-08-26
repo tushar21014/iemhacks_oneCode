@@ -1,5 +1,4 @@
 # iemhacks_oneCode
-# **Project README: OnlyUs**
 
 ## **Team One Code**
 
