@@ -3,7 +3,10 @@ const express = require('express');
 const socketIO = require('socket.io');
 const cors = require('cors');
 const connectToMongo = require('./db');
+require("dotenv").config()
+
 connectToMongo();
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -24,65 +27,74 @@ io.on("connection", (socket) => {
     socket.on('joined', async ({ user, authToken }) => {
         users[socket.id] = user;
         console.log("Current User " + socket.id)
-        console.log(`${user} has joined`);
+        console.log(`User has joined`);
 
         const response = await fetch('http://localhost:5004/api/auth/updateOnlinestatus', {
             method: 'PUT',
             headers: {
-                "Content-Type":"application/json",
+                "Content-Type": "application/json",
                 "auth-Token": authToken
             },
-            body:JSON.stringify({socketId: socket.id})
+            body: JSON.stringify({ socketId: socket.id })
         })
-        
-        if(!response.ok){
+
+        if (!response.ok) {
             console.log('Error updating status:', response.statusText);
         }
-        
-        
+
+
         // console.log("Api hit")
-            socket.broadcast.emit('userJoined', { user: "Admin", message: `${user} has joined the chat` });
-            socket.emit('welcome', { user: user, message: "Welcome to the chat" });
+        // broadcast: Apna user chod ke baaki sbko msg jayega
+        // emit : Send
+        socket.emit('userJoined', { user: "Admin", message: `${user} has joined the chat` });
+        socket.emit('welcome', { user: user, message: "Welcome to the chat" });
 
-            
+
     });
-
-    socket.on('message', ({ message, id,targetId }) => {
-        console.log(id)
-        console.log(targetId)
-        io.to(targetId).emit('sendMessage', { user: users[id], message, id, targetId })
-    })
     
-    socket.on('findUser',async (authToken)=>{
+    
+    
+    
+    socket.on('findUser', async (authToken) => {
         const finduser = await fetch('http://localhost:5004/api/auth/findFreeuser', {
             method: 'POST',
             headers: {
-                "Content-Type":"application/json",
+                "Content-Type": "application/json",
                 "auth-Token": authToken
             }
         })
-    
+
         let data = await finduser.json();
         console.log("Target User " + data.socketId);
         // console.log(data)
         socket.emit('matchedUser', data.socketId);
-
+        
     })
+    
+
+    // Used For sending message
+    socket.on('message', ({ message, id, targetId }) => {
+        console.log(id);
+        console.log(targetId);
+        
+        io.to(targetId).emit('sendMessage', { user: users[id], message, id, targetId });
+        io.to(id).emit('sendMessage', { user: users[id], message, targetId, id });
+    });
 
     // socket.on('message', ({ message, targetUserId }) => {
-        // Find the target socket ID using the target user ID
-        // const targetSocketId = Object.keys(activeUsers).find(socketId => activeUsers[socketId] === targetUserId);
-
+    // Find the target socket ID using the target user ID
+    // const targetSocketId = Object.keys(activeUsers).find(socketId => activeUsers[socketId] === targetUserId);
+    
     //     if (targetUserId) {
     //         io.to(targetUserId).emit('privateMessage', { user: users[socket.id], message });
     //     } else {
     //         // Handle case when target user is not online
     //     }
     // });
-    
+
     socket.on('disconnect', () => {
         if (users[socket.id]) {
-            
+
             console.log(`${users[socket.id]} has left`);
             socket.broadcast.emit('leave', { user: `${users[socket.id]}`, message: "Has left the chat" })
             delete users[socket.id];
@@ -91,12 +103,12 @@ io.on("connection", (socket) => {
 
 });
 
-const port = 4500;
+const port = process.env.SERVER_PORT;
 server.listen(port, () => {
     console.log(`Server is working on http://localhost:${port}`);
 });
 
-app.listen(5004, () => {
+app.listen(process.env.PORT, () => {
     console.log(`Backend listening on port 5004`)
 })
 

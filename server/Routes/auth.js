@@ -123,14 +123,24 @@ router.post('/findFreeUser', fetchuser, async (req, res) => {
       isOnline: true,
       isOffline: false,
       isFree: true,
-      _id: { $ne: userId }
+      _id: { $ne: userId }    // Apne user ke ilava result m dikhayega
     });
 
     if (!response)
       return res.json({ message: "No user is available right now" });
+
     else {  
-      await User.findByIdAndUpdate(userId, { currentConnection: response.socketId, isFree: false });
-      await User.findByIdAndUpdate(response._id , {isFree: false, currentConnection: userId.socketId});
+      let ress1 = await User.findByIdAndUpdate(userId, { currentConnection: response.socketId,isFree:false });  
+      console.log("I am userId socketId " + userId)
+      let ress2 = await User.findByIdAndUpdate(response._id , { currentConnection: userId.socketId,isFree:false}); 
+      if(!ress1)
+      {
+        console.log(ress1);
+      }
+      if(!ress2)
+      {
+        console.log(ress2);
+      }
       return res.json(response).status(200);
     }
   } catch (error) {
@@ -140,16 +150,28 @@ router.post('/findFreeUser', fetchuser, async (req, res) => {
 });
 
 
-router.put("/updateFindingstatus", fetchuser, async (req, res) => {
+// router.put("/updateFindingstatus", fetchuser, async (req, res) => {
+//   let userId = req.user;
+//   try {
+//     await User.findByIdAndUpdate(userId, { isFree: false })
+//     res.json({ message: "Updated" }).status(200)
+//   } catch (error) {
+//     console.log(error);
+//     res.json({ message: "Error while updating offline status" }).status(500);
+//   }
+// })
+router.put("/updateDisconnect", fetchuser, async (req, res) => {
   let userId = req.user;
   try {
-    await User.findByIdAndUpdate(userId, { isFree: false })
-    res.json({ message: "Updated" }).status(200)
+    await User.findByIdAndUpdate(userId, { isFree: false, isOnline: false,isOffline:true });
+    res.json({ message: "Disconnected" }).status(200)
   } catch (error) {
     console.log(error);
     res.json({ message: "Error while updating offline status" }).status(500);
   }
 })
+
+
 
 
 module.exports = router;

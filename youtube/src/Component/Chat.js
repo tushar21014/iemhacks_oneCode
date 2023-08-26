@@ -55,6 +55,7 @@ const Chat = () => {
       setTargetId(data);
       console.log("Found a match", data);
     });
+    
 
     return () => {
       socket.disconnect();
@@ -77,3 +78,4 @@ const Chat = () => {
 };
 
 export default Chat;
+
