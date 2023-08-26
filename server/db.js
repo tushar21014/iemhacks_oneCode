@@ -1,9 +1,8 @@
 const mongoose = require('mongoose');
-
+require("dotenv").config()
 async function connectToMongo() {
     try {
-        // await mongoose.connect('mongodb+srv://tusharlps31:JHGP1NHFvhsenu0E@zomaggy.bqfatbu.mongodb.net/?retryWrites=true&w=majority', {
-        await mongoose.connect('mongodb+srv://oneCode:wVqTFqBPSyYNBv8@onecode.odzsgs3.mongodb.net/', {
+        await mongoose.connect(process.env.URI, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
         });
