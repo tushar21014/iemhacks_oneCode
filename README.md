@@ -1,5 +1,3 @@
-# iemhacks_oneCode
-
 Team:
 Team Leader: Tushar Gupta
 Team Support : Samanrpreet Sigh
