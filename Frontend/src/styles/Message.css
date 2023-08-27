@@ -1,0 +1,48 @@
+
+.chatmessage{
+  /* background-color:  !important; */
+  /* color: #fff; */
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 2px;
+}
+.smn-container {
+    /* background-color: #f1f1f1; */
+    /* border-radius: 5px; */
+    padding:15px 0 2px 8px;
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    
+
+    
+  }
+  
+
+  .smn-darker {
+    border-color: #ccc;
+    background-color: #ddd;
+  }
+  
+
+  .smn-container::after {
+    content: "";
+    clear: both;
+    display: table;
+    
+  }
+
+  .smn-time-right {
+    float: right;
+    color: #aaa;
+  }
+  
+
+  .smn-time-left {
+    float: left;
+    color: #999;
+  }
+
+
+  

@@ -9,6 +9,9 @@ const userSchema = new Schema({
         required: true,
         unique: true
     },
+    verify_token: {
+        type : String
+    },
     email:{
         type:String,
         required: true,

@@ -2,9 +2,10 @@
   "name": "current-project",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "devStart": "nodemon server.js"
+    "devStart": "nodemon server.js",
+    "both": "concurrently \"cd server && nodemon index.js\" \"cd Frontend && npm run start\""
   },
   "author": "",
   "license": "ISC",
@@ -14,6 +15,7 @@
     "socket.io": "^2.5.0"
   },
   "devDependencies": {
-    "nodemon": "^1.19.0"
+    "nodemon": "^1.19.0",
+    "concurrently" : "^8.2.1"
   }
 }

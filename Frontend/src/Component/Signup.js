@@ -1,6 +1,8 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-
+import '../styles/Signup.css'
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 const Signup = () => {
     const [credentials, setCredentials] = useState({ name: "", email: "", pass: "", phone: "", location: "" });
     let navigate = useNavigate();
@@ -42,6 +44,11 @@ const Signup = () => {
     const handleChange = (e) => {
         setCredentials({ ...credentials, [e.target.name]: e.target.value })
     }
+    
+
+    useEffect(() => {
+        AOS.init({ duration: 1000, });
+    }, [])
 
   return (
     <div>

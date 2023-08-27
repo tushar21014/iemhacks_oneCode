@@ -15,8 +15,8 @@
   .popup{
     display: flex;
     position: absolute;
-    top:10vh;
-    right: 5vw;
+    top: 30px;
+    right: 10px;
     flex-direction: column;
     min-height: 100vh;
   }

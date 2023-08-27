@@ -129,7 +129,7 @@ router.post('/findFreeUser', fetchuser, async (req, res) => {
     });
 
     if (!response)
-      return res.json({ message: "No user is available right now" });
+      return res.json({ message: "No user is available right now", usersAvailables: false });
 
     else {
       let ress1 = await User.findByIdAndUpdate(userId, { currentConnection: response.socketId, isFree: false });
@@ -168,9 +168,13 @@ router.put("/updateDisconnect", async (req, res) => {
 router.post("/makeFriend", fetchuser, async (req, res) => {
   let userId = req.user;
   const secondUsersocketId = req.body.current_connection;
+  console.log("userId", userId)
+  console.log("Second userId: ", secondUsersocketId)
   try {
     const firstUser = await User.findById(userId);
     const secondUser = await User.findOne({ socketId: secondUsersocketId });
+    // console.log("First User: ", firstUser)
+    // console.log("Second User: ", secondUser)
 
     if (firstUser.friends.includes(secondUser._id)) {
       return res.json({ message: "Friend already exists." });
@@ -181,7 +185,7 @@ router.post("/makeFriend", fetchuser, async (req, res) => {
     }
 
     const updatedFirstUser = await User.findByIdAndUpdate(
-      userId,
+      firstUser._id,
       { $push: { friends: secondUser._id } },
       { new: true }
     );
@@ -197,6 +201,8 @@ router.post("/makeFriend", fetchuser, async (req, res) => {
     }
 
     // Calculate the expiration timestamp for the timer
+    const TWO_DAYS_IN_MILLISECONDS = 2 * 24 * 60 * 60 * 1000; // 2 days in milliseconds
+
     const timerExpiration = Date.now() + TWO_DAYS_IN_MILLISECONDS;
 
     // Store the timer expiration timestamp in both users' documents
@@ -314,21 +320,24 @@ router.post('/sendLink', async (req, res) => {
         });
 
         const message = {
-          from: 'Zomaggy',
+          from: 'Talk o lytic',
           to: email,
           subject: 'Password Reset Link',
-          text: `Click the following link to reset your password: https://zomaggy-383610.web.app/Resetpassword/${ans.id}/${token}`,
+          text: `Click the following link to reset your password: https://talkolytic-app.com/ResetPassword/${ans.id}/${token}`,
           html: `<body>
-          <div class='parentpass'>
-          <div class='passcont' style="padding: 10px 30px 10px 30px;background: beige;">
-          <p>Dear ${ans.name} <br>
-          We just received a request to reset your password. This link will take you to the password reset page, and you can proceed from there.
-          If you did not attempt to reset your password, please ignore this email. No changes will be made to your login information.
-          Click the following link to reset your password:</p>
-          <a href="https://zomaggy-383610.web.app/Resetpassword/${ans.id}/${token}"> Reset Password</a><br> 
-          <b><p>Note: This link is valid for only 5 minutes</p></b></body> <br></div>
-          </div>
-          Thank You`
+            <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f7f7f7;">
+              <div style="background-color: white; border-radius: 10px; padding: 20px; box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.3);">
+                <h2>Hello ${ans.name},</h2>
+                <p>We've received a request to reset your password. To proceed with the password reset, click the button below:</p>
+                <div style="text-align: center; margin-top: 20px;">
+                  <a href="https://talkolytic-app.com/ResetPassword/${ans.id}/${token}" style="background-color: #007bff; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none;">Reset Password</a>
+                </div>
+                <p style="margin-top: 20px;">If you didn't request a password reset, you can safely ignore this email.</p>
+                <p>Note: This link is valid for 5 minutes.</p>
+                <p>Thank you for using Talk o lytic!</p>
+              </div>
+            </div>
+          </body>`
         };
 
 
@@ -396,5 +405,21 @@ router.put('/changePass/:id/:token', async (req, res) => {
     console.log(error);
   }
 });
+
+router.put('/reactionUpdate', async(req,res)=>{
+  let current_connection = req.body.targetID
+  try {
+    let firstuser = await User.findOneAndUpdate({socketId: current_connection },{isFree: true});
+    if(firstuser){
+      res.json({message:"Updated Successfully", success: true})
+    }
+    else{
+      res.json({message:"User not Found", success: false});
+    }
+    
+  } catch (error) {
+    console.log(error)
+  }
+})
 
 module.exports = router;

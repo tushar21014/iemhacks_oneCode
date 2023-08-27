@@ -28,18 +28,11 @@ io.on("connection", (socket) => {
     socket.on('connectionRequest', ({ targetId, showPopup }) => {
         io.to(targetId).emit('showConnectionRequestPopup', { showPopup });
       });
-    
-      socket.on('acceptConnectionRequest', async () => {
-        io.emit('onRequestAccept'); // Broadcast to all sockets
-      });
-    
-      socket.on('rejectConnectionRequest', async () => {
-        io.emit('onRequestReject'); // Broadcast to all sockets
-      });
 
-      socket.on('acceptConnectionRequest', async (authToken, sender) => {
-    
+      socket.on('acceptConnectionRequest', async ({authToken, current_connection}) => {
+
         // Call the /makeFriend endpoint using fetch or axios
+
         const response = await fetch("http://localhost:5004/api/auth/makeFriend", {
           method: "POST",
           headers: {
@@ -47,15 +40,36 @@ io.on("connection", (socket) => {
             "auth-Token": authToken
           },
           body: JSON.stringify({
-            current_connection: sender, 
-            auth: authToken
+            current_connection: current_connection, 
+            authToken: authToken
           })
         });
     
-        const data = await response.json();
-        console.log(data);
+        const newData = await response.json();
+        console.log(newData);
       });
 
+      socket.on('rejectConnectionRequest', async ({targetId, authToken}) => {
+        io.to(targetId).emit('update', { socketId: targetId, authToken: authToken });
+      })
+
+    socket.on('update', async ({ socketId, authToken }) => {
+        console.log("Current ID " + socketId)
+
+        const response = await fetch('http://localhost:5004/api/auth/reactionUpdate', {
+            method: 'PUT',
+            headers: {
+                "Content-Type": "application/json",
+                "auth-Token": authToken
+            },
+            body: JSON.stringify({ targetID: socketId })
+        })
+
+        if (!response.success) {
+            console.log('Error updating status:', response.statusText);
+        }
+
+    });
     socket.on('joined', async ({ user, authToken }) => {
         users[socket.id] = user;
         console.log("Current User " + socket.id)
@@ -73,13 +87,6 @@ io.on("connection", (socket) => {
         if (!response.ok) {
             console.log('Error updating status:', response.statusText);
         }
-
-
-        // console.log("Api hit")
-        // broadcast: Apna user chod ke baaki sbko msg jayega
-        // emit : Send
-        // socket.emit('userJoined', { user: "Admin", message: `${user} has joined the chat` });
-
 
     });
 
