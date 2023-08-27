@@ -66,6 +66,12 @@ With the setup complete, you are ready to dive into **OnlyUs**. Here's how to pr
    npm start
    ```
 
+### OR
+1. Start both the server: Run the following command in the root directory terminal:
+```
+npm run both
+```
+
 3. Access the Application: Open your web browser and visit `http://localhost:3000` to start using **OnlyUs**.
 
 ---
