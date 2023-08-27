@@ -17,7 +17,10 @@ const Chat = () => {
 
   const sendConnectionRequest = () => {
     console.log("Sending Connection: ", id)
+    setShowConnectionRequestPopup(true)
     socket.emit('connectionRequest', { targetId, sender: user, socketID: id, authToken: localStorage.getItem('auth-Token') });
+    socket.emit('onRequestAccept', { targetId });
+    // socket.emit('onRequestDecline',(data));
   };
 
   const handleConnectionAcceptance = () => {
@@ -32,7 +35,7 @@ const Chat = () => {
     document.getElementById('chatInput').value = "";
   };
 
- 
+
   const findUser = () => {
     socket.emit('findUser', localStorage.getItem('auth-Token'));
   };
@@ -59,21 +62,37 @@ const Chat = () => {
     });
 
     socket.on('leave', (data) => {
-      socket.emit("disconnection",  localStorage.getItem('auth-Token'))
       setMessages((prevMessages) => [...prevMessages, data]);
       console.log(data.user, data.message);
     });
-
+    
     socket.on('sendMessage', (data) => {
       setMessages((prevMessages) => [...prevMessages, data]);
     });
-
+    
     socket.on('matchedUser', (data) => {
       setTargetId(data);
       console.log("Found a match", data);
     });
 
+    socket.on('onRequestAccept', () => {
+      // When the connection request is accepted by the other user
+      setShowConnectionRequestPopup(false);
+      // You can update your UI or take other actions here
+    });
+    
+    socket.on('onRequestReject', () => {
+      // When the connection request is rejected by the other user
+      setShowConnectionRequestPopup(false);
+      // You can update your UI or take other actions here
+    });
 
+    socket.on('disconnect', () => {
+      socket.emit('disconnection',{authToken: localStorage.getItem('auth-Token')})
+      // Perform any cleanup or logging needed
+      console.log('Disconnected');
+    });
+    
     return () => {
       socket.disconnect();
     };
@@ -93,13 +112,20 @@ const Chat = () => {
       <button id='connectButton' onClick={sendConnectionRequest}>Connect</button>
 
       {showConnectionRequestPopup && (
-        <Friend 
-        onRequestAccept={""}
-        onRequestReject={""}
+        <Friend
+          onRequestAccept={() => {
+            // Handle the logic when the user accepts the connection request
+            socket.emit('acceptConnectionRequest');
+            setShowConnectionRequestPopup(false);
+          }}
+          onRequestReject={() => {
+            // Handle the logic when the user rejects the connection request
+            socket.emit('rejectConnectionRequest');
+            setShowConnectionRequestPopup(false);
+          }}
         />
-      )
-
-      }
+      )}
+      
     </div>
   );
 };

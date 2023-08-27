@@ -1,16 +1,14 @@
-import React from 'react'
+import React from 'react';
 
 const Message = (props) => {
-    if (props.user) {
-        return (
-            <div>{props.user} : {props.message}</div>
-        )
-    }
-    else {
-        return (
-            <div>You : {props.message}</div>
-        )
-    }
-}
+    const isCurrentUser = props.user === 'You'; // Modify 'You' according to how you represent the current user
 
-export default Message
+    return (
+        <div>
+            {!isCurrentUser && <span>{props.user} : </span>}
+            {isCurrentUser ? 'You' : props.message}
+        </div>
+    );
+};
+
+export default Message;

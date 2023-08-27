@@ -124,7 +124,7 @@ router.post('/findFreeUser', fetchuser, async (req, res) => {
       isOnline: true,
       isOffline: false,
       isFree: true,
-      _id: { $ne: userId }    // Apne user ke ilava result m dikhayega
+      _id: { $ne: userId },    // Apne user ke ilava result m dikhayega,
     });
 
     if (!response)
@@ -156,8 +156,8 @@ router.post('/findFreeUser', fetchuser, async (req, res) => {
 router.put("/updateDisconnect", fetchuser, async (req, res) => {
   let userId = req.user;
   try {
-    await User.findByIdAndUpdadte(userId, { isFree: false, isOnline: false, isOffline: true });
-    res.json({ message: "Disconnected" }).status(200)
+    await User.findByIdAndUpdate(userId, { isFree: false, isOnline: false, isOffline: true });
+    res.json({ message: "Disconnected",success:"true  " }).status(200)
   } catch (error) {
     console.log(error);
     res.json({ message: "Error while updating offline status" }).status(500);
@@ -171,6 +171,14 @@ router.post("/makeFriend", fetchuser, async (req, res) => {
   try {
     const firstUser = await User.findById(userId);
     const secondUser = await User.findOne({ socketId: secondUsersocketId });
+    
+    if(firstUser.friends.includes(secondUser._id)){
+      return res.json({message: "Friend Already exist."})
+    }
+
+    if(secondUser.friends.includes(firstUser._id)){
+      return res.json({message: "Friend Already exist."})
+    }
     let ress = await User.findByIdAndUpdate(userId, { $push: { friends: secondUser._id } }, { new: true });
     const ress2 = await User.findByIdAndUpdate(secondUser._id, { $push: { friends: firstUser._id } }, { new: true });
     if (!ress) {

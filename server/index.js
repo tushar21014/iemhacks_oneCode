@@ -24,25 +24,37 @@ const io = socketIO(server);
 
 io.on("connection", (socket) => {
     console.log("New Connection");
+    
+      socket.on('acceptConnectionRequest', async () => {
+        // io.to(socket.id).emit('onRequestAccept');
+        io.broadcast.emit('onRequestAccept');
+    
+      });
+    
+      socket.on('rejectConnectionRequest', async () => {
+        io.to(socket.id).emit('onRequestReject');
+    
+      });
 
     socket.on('connectionRequest', async ({ targetId, sender, socketID, authToken }) => {
         io.to(targetId).emit('connectionRequestReceived', { sender, socketID });
-
-        let res = await fetch("http://localhost:5004/api/auth/makeFriend", {
-            method: "POST",
-            headers: {
-                "content-type": "application/json",
-                "auth-Token": authToken
-            },
-            body: JSON.stringify({
-                current_connection: targetId,
-                user: sender,
-                socketId: socketID,
-                auth: authToken
+        socket.on('onRequestAccept', async()=>{
+            let res = await fetch("http://localhost:5004/api/auth/makeFriend", {
+                method: "POST",
+                headers: {
+                    "content-type": "application/json",
+                    "auth-Token": authToken
+                },
+                body: JSON.stringify({
+                    current_connection: targetId,
+                    user: sender,
+                    socketId: socketID,
+                    auth: authToken
+                })
             })
+            let data = await res.json()
+            console.log(data);
         })
-        let data = await res.json()
-        console.log(data);
     });
 
     socket.on('joined', async ({ user, authToken }) => {
@@ -101,27 +113,33 @@ io.on("connection", (socket) => {
     });
 
 
-
-    socket.on('disconnect', async (req, res) => {
-        if (users[socket.id]) {
-
-            console.log(`${users[socket.id]} has left`);
-            socket.broadcast.emit('leave', { user: `${users[socket.id]}`, message: "Has left the chat" })
-            delete users[socket.id];
+    socket.on('disconnection', async ({authToken}) => {
+        const response = await fetch('http://localhost:5004/api/auth/updateDisconnect', {
+          method: 'PUT',
+          headers: {
+            "Content-Type": "application/json",
+            "auth-Token": authToken
+          }
+        });
+        let data = await response.json();
+        if (response.status === 200) {
+          console.log("User Disconnected");
+        }
+        else{
+            console.log(data)
         }
 
-        // const response = await fetch('http://localhost:5004/api/auth/updateDisconnect', {
-        //     method: 'PUT',
-        //     headers: {
-        //       "Content-Type": "application/json",
-        //       "auth-Token": authToken  // Use the stored authToken
-        //     }
-        //   });
-
-        //   if (response.ok) {
-        //     res.json({ message: "User Discconnected" });
-        //   }
-    });
+        if (users[socket.id]) {
+          console.log(`${users[socket.id]} has left`);
+          socket.broadcast.emit('leave', { user: users[socket.id], message: "Has left the chat" });
+          delete users[socket.id];
+      
+          // Get the authToken from the socket handshake query
+          const authToken = socket.handshake.query.authToken;
+      
+        }
+      });
+      
 
 });
 
