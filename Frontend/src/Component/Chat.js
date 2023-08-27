@@ -6,20 +6,24 @@ import '../styles/Chat.css'
 import Friend from './Friend';
 import { useNavigate } from 'react-router-dom';
 import { BsFillSendFill } from 'react-icons/bs'
-import {ImExit} from 'react-icons/im'
-
+import { ImExit } from 'react-icons/im'
 const ENDPOINT = "http://localhost:4500/";
 let socket;
 const Chat = () => {
   const date = new Date().now;
   const navigate = useNavigate()
+  const [friends, setFriends] = useState([])
   { !localStorage.getItem('auth-Token') ? <>{navigate('/Login')}</> : <></> }
   const [messages, setMessages] = useState([]);
   const [id, setId] = useState("");
   const [targetId, setTargetId] = useState("");
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const [showConnectionRequestPopup, setShowConnectionRequestPopup] = useState(false);
 
+  const toggleExpansion = () => {
+    setIsExpanded(!isExpanded);
+  };
   const handleKeyPress = (event) => {
     if (event.key === 'Enter') {
       send();
@@ -35,6 +39,24 @@ const Chat = () => {
     socket.emit('acceptConnection', { sender: user });
   };
 
+  const getFriends = async() => {
+    console.log("I am clicked ")
+    try {
+      let res = await fetch('http://localhost:5004/api/auth/getFriend',{
+        method:"POST",
+        headers:{
+          "content-type": "application/json",
+          "auth-Token" : localStorage.getItem('auth-Token')
+        }
+      })
+      let data = await res.json();
+      console.log(data.friendUsernames)
+      setFriends(data.usernames)
+      console.log("I am friends" + friends)
+    } catch (error) {
+      
+    }
+  }
   const send = () => {
     const message = document.getElementById('chatInput').value;
     console.log("ID: ", id)
@@ -56,7 +78,7 @@ const Chat = () => {
 
   useEffect(() => {
     socket = socketIo(ENDPOINT, { transports: ['websocket'] });
-
+    getFriends()
     socket.on('connectionRequestReceived', ({ sender, socketID, showPopup }) => {
       if (showPopup) {
         setShowConnectionRequestPopup(true);
@@ -146,7 +168,7 @@ const Chat = () => {
       <button class="Btn" onClick={() => Logout()}>
 
         <div class="sign">
-          <ImExit /> 
+          <ImExit />
         </div>
 
         <div class="text">Logout</div>
@@ -160,15 +182,6 @@ const Chat = () => {
         <div className={`chatBox chatBoxContainer`}>
           {messages.map((item, key) => <Message date={date} key={key} message={item.message} user={item.username || "You"} />)}
         </div>
-        <div className='tusharRow'>
-
-          <div className='inputBox'>
-            <input type="text" id="chatInput" placeholder='Type your message...' onKeyPress={e => handleKeyPress(e)} />
-          </div>
-          <button type="button" className="tusharSend mx-2" onClick={send}><BsFillSendFill className='sendIcon' style={{ color: "blue", border: "none" }} /></button>
-          <button className='btn btn-primary tusharFindSomeone mx-2' onClick={findUser}>Find Someone</button>
-          <button className='btn btn-primary tusharConnect mx-2' id='connectButton' onClick={sendConnectionRequest}>Connect</button>
-        </div>
 
         {showConnectionRequestPopup && (
           <Friend
@@ -181,6 +194,26 @@ const Chat = () => {
           />
         )}
 
+      </div>
+      <div className='tusharRow ml-4'>
+
+        <div className='inputBox'>
+          <input type="text" id="chatInput" placeholder='Type your message...' onKeyPress={e => handleKeyPress(e)} />
+        </div>
+        <button type="button" className="tusharSend mx-2" onClick={send}><BsFillSendFill className='sendIcon' style={{ color: "blue", border: "none" }} /></button>
+        <button className='btn btn-primary tusharFindSomeone mx-2' onClick={findUser}>Find Someone</button>
+        <button className='btn btn-primary tusharConnect mx-2' id='connectButton' onClick={sendConnectionRequest}>Connect</button>
+      </div>
+      <div className={`friendsList ${isExpanded ? 'expanded' : ''}`} onClick={toggleExpansion}>
+        <div className='topFriends'>
+        <b>Friends</b>
+        </div>
+        <div className='friendList'>
+          {friends && friends.map((e) => {
+            return <div>{console.log(e)}
+              {e}</div>
+          })}
+        </div>
       </div>
     </div>
   );
