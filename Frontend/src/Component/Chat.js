@@ -39,14 +39,14 @@ const Chat = () => {
     socket.emit('acceptConnection', { sender: user });
   };
 
-  const getFriends = async() => {
+  const getFriends = async () => {
     console.log("I am clicked ")
     try {
-      let res = await fetch('http://localhost:5004/api/auth/getFriend',{
-        method:"POST",
-        headers:{
+      let res = await fetch('http://localhost:5004/api/auth/getFriend', {
+        method: "POST",
+        headers: {
           "content-type": "application/json",
-          "auth-Token" : localStorage.getItem('auth-Token')
+          "auth-Token": localStorage.getItem('auth-Token')
         }
       })
       let data = await res.json();
@@ -196,20 +196,35 @@ const Chat = () => {
       </div>
       <div className='tusharRow ml-4'>
 
-        <div className='inputBox'>
-          <input type="text" id="chatInput" placeholder='Type your message...' onKeyPress={e => handleKeyPress(e)} />
+        <div class="Message">
+        <input title="Write Message" tabindex="i" pattern="\d+" placeholder="Message.." class="MsgInput" type="text" onKeyPress={e => handleKeyPress(e)} id="chatInput"/>
+            <svg onClick={send} xmlns="http://www.w3.org/2000/svg" version="1.0" width="30.000000pt" height="30.000000pt" viewBox="0 0 30.000000 30.000000" preserveAspectRatio="xMidYMid meet" class="SendSVG">
+              <g transform="translate(0.000000,30.000000) scale(0.100000,-0.100000)" fill="#ffffff70" stroke="none">
+                <path d="M44 256 c-3 -8 -4 -29 -2 -48 3 -31 5 -33 56 -42 28 -5 52 -13 52 -16 0 -3 -24 -11 -52 -16 -52 -9 -53 -9 -56 -48 -2 -21 1 -43 6 -48 10 -10 232 97 232 112 0 7 -211 120 -224 120 -4 0 -9 -6 -12 -14z"></path>
+              </g>
+            </svg><span class="l"></span>
         </div>
-        <button type="button" className="tusharSend mx-2" onClick={send}><BsFillSendFill className='sendIcon' style={{ color: "blue", border: "none" }} /></button>
+
+
+        {/* <div className='inputBox'>
+          <input type="text" id="chatInput" placeholder='Type your message...' onKeyPress={e => handleKeyPress(e)} />
+          <button type="button" className="tusharSend mx-2" onClick={send}><BsFillSendFill className='sendIcon' style={{ color: "blue", border: "none" }} /></button>
+        </div> */}
+
         <button className='btn btn-primary tusharFindSomeone mx-2' onClick={findUser}>Find Someone</button>
+
+
+
+
         <button className='btn btn-primary tusharConnect mx-2' id='connectButton' onClick={sendConnectionRequest}>Connect</button>
       </div>
       <div className={`friendsList ${isExpanded ? 'expanded' : ''}`} onClick={toggleExpansion}>
         <div className='topFriends'>
-        <b>Friends</b>
+          <b>Friends</b>
         </div>
         <div className='friendList'>
           {friends && friends.map((e) => {
-            return <div>{console.log(e)}
+            return <div key={e}>{console.log(e)}
               {e}</div>
           })}
         </div>

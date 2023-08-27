@@ -6,6 +6,9 @@ body{
     height: 100%;
     margin: 0;
 }
+.inputBox{
+    width: 70dvw;
+}
 
 .chatBox{
     display: grid;
@@ -14,28 +17,29 @@ body{
     margin-top: 10px;
 }
 
+.inputBox input{
+    width: 100%;
+    border-radius: 20px;
+    border: 0.5px gray solid;
+    height: 100%;
+    padding: 0% 3%;
+    margin-right: 1rem ;
+}
+
 .tusharRow{
     position: absolute;
     bottom: 5vh;
     display: flex;
 }
 
-.inputBox input{
-    width: 60vw;
-    border-radius: 20px;
-    border: 0.5px gray solid;
-    height: 6vh;
-    padding: 0% 3%;
-    margin-right:1rem ;
-}
 
 
 .tusharSend{
     border: none;
     position: absolute;
     top: 1vh;
-    right: 25%;
-    background: transparent
+    right: 20%;
+    background: transparent;
 }
 
 .chatBoxContainer{
@@ -154,3 +158,60 @@ body{
     position: absolute;
     top: 0;
   }
+
+@media screen and (max-width : 414px){
+  .tusharSend{
+    position: absolute;
+    left : 40px;
+    bottom : 10px;
+  }
+
+
+}
+
+
+.Message {
+    width: 75dvw;
+    height: 40px;
+    border-radius: 10px;
+    background-color: #40414f;
+    transform: translate(0px,0px);
+    box-shadow: 5px 5px #34343f;
+  }
+  
+  .MsgInput {
+    font-size: 18px;
+    border-radius: 5px;
+    background-color: #40414f;
+    border: none;
+    outline: none;
+    width: 94%;
+    height: 30px;
+    transform: translate(5px,-3px);
+    color: white;
+    padding: 10px;
+    font-weight: bold;
+  }
+  
+  .SendSVG {
+    width: 30px;
+    height: 30px;
+    border-width: 50px;
+    transform: translate(20px,5px);
+    background-size: 10px;
+    border-radius: 10px;
+    transition: 0.3s;
+  }
+  
+  .SendSVG:hover {
+    background-color: #2b2b35;
+  }
+  
+  .l {
+    position: absolute;
+    width: 1%;
+    height: 30px;
+    background-color: #2e2f38;
+    transform: translate(-20px,5px);
+  }
+  
