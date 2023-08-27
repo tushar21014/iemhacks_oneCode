@@ -25,37 +25,36 @@ const io = socketIO(server);
 io.on("connection", (socket) => {
     console.log("New Connection");
     
-      socket.on('acceptConnectionRequest', async () => {
-        // io.to(socket.id).emit('onRequestAccept');
-        io.broadcast.emit('onRequestAccept');
+    socket.on('connectionRequest', ({ targetId, showPopup }) => {
+        io.to(targetId).emit('showConnectionRequestPopup', { showPopup });
+      });
     
+      socket.on('acceptConnectionRequest', async () => {
+        io.emit('onRequestAccept'); // Broadcast to all sockets
       });
     
       socket.on('rejectConnectionRequest', async () => {
-        io.to(socket.id).emit('onRequestReject');
-    
+        io.emit('onRequestReject'); // Broadcast to all sockets
       });
 
-    socket.on('connectionRequest', async ({ targetId, sender, socketID, authToken }) => {
-        io.to(targetId).emit('connectionRequestReceived', { sender, socketID });
-        socket.on('onRequestAccept', async()=>{
-            let res = await fetch("http://localhost:5004/api/auth/makeFriend", {
-                method: "POST",
-                headers: {
-                    "content-type": "application/json",
-                    "auth-Token": authToken
-                },
-                body: JSON.stringify({
-                    current_connection: targetId,
-                    user: sender,
-                    socketId: socketID,
-                    auth: authToken
-                })
-            })
-            let data = await res.json()
-            console.log(data);
-        })
-    });
+      socket.on('acceptConnectionRequest', async (authToken, sender) => {
+    
+        // Call the /makeFriend endpoint using fetch or axios
+        const response = await fetch("http://localhost:5004/api/auth/makeFriend", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "auth-Token": authToken
+          },
+          body: JSON.stringify({
+            current_connection: sender, 
+            auth: authToken
+          })
+        });
+    
+        const data = await response.json();
+        console.log(data);
+      });
 
     socket.on('joined', async ({ user, authToken }) => {
         users[socket.id] = user;
@@ -79,8 +78,7 @@ io.on("connection", (socket) => {
         // console.log("Api hit")
         // broadcast: Apna user chod ke baaki sbko msg jayega
         // emit : Send
-        socket.emit('userJoined', { user: "Admin", message: `${user} has joined the chat` });
-        socket.emit('welcome', { user: user, message: "Welcome to the chat" });
+        // socket.emit('userJoined', { user: "Admin", message: `${user} has joined the chat` });
 
 
     });
@@ -96,11 +94,14 @@ io.on("connection", (socket) => {
         })
 
         let data = await response.json();
-        socket.emit('matchedUser', data.socketId);
-        io.to(data.socketId).emit('matchedUser', socket.id);
-        console.log("Target User " + data.socketId);
-        console.log("D:", data)
-        // socket.emit('matchedUser', data.socketId);
+
+        if(data.usersAvailables !== false){
+            socket.emit('matchedUser', data.socketId);
+            io.to(data.socketId).emit('matchedUser', socket.id);
+            console.log("Target User " + data.socketId);
+            socket.emit('welcome', { user: "User", message: "Another Homosapien is here! Please Feel Free to talk" });
+            io.to(data.socketId).emit('welcome', { user: "User", message: "Another Homosapien is here! Please Feel Free to talk" });
+        }
 
     })
 
@@ -108,18 +109,19 @@ io.on("connection", (socket) => {
 
     socket.on('message', ({ message, id, targetId }) => {
         console.log()
-        io.to(targetId).emit('sendMessage', { message, id, targetId });
+        io.to(targetId).emit('sendMessage', { message, id, targetId, username : "Anonymous" });
         io.to(id).emit('sendMessage', { message, targetId, id });
     });
 
 
-    socket.on('disconnection', async ({authToken}) => {
+    socket.on('disconnect', async () => {
+        console.log("I am auth", socket.id)
         const response = await fetch('http://localhost:5004/api/auth/updateDisconnect', {
           method: 'PUT',
           headers: {
             "Content-Type": "application/json",
-            "auth-Token": authToken
-          }
+          },
+          body: JSON.stringify({socketId: socket.id})
         });
         let data = await response.json();
         if (response.status === 200) {

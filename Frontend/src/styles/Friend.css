@@ -1,6 +1,6 @@
 .card {
-    width: 190px;
-    height: 254px;
+    width: 17vw;
+    height: 43vh;
     border-radius: 1em;
     flex-direction: column;
     justify-content: space-evenly;
@@ -14,8 +14,9 @@
 
   .popup{
     display: flex;
-    justify-content: center;
-    align-items: center;
+    position: absolute;
+    top:10vh;
+    right: 5vw;
     flex-direction: column;
     min-height: 100vh;
   }

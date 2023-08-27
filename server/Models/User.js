@@ -6,11 +6,13 @@ const { Schema } = mongoose;
 const userSchema = new Schema({
     username:{
         type:String,
-        required: true
+        required: true,
+        unique: true
     },
     email:{
         type:String,
-        required: true
+        required: true,
+        unique: true
     },
     pass:{
         type:String,
@@ -39,8 +41,12 @@ const userSchema = new Schema({
     },
     friends: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User' // Replace 'User' with the actual name of the referenced model
+        ref: 'User'
     }],
+    friendTimerExpires: {
+        type: Date,
+        default: null
+    },
     date: {
         type: Date,
         default: Date.now

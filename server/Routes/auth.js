@@ -8,6 +8,7 @@ const jwt = require('jsonwebtoken');
 const Signature = 'Tushar'
 app.use(express.json());
 const fetchuser = require('../middleware/fetchuser');
+require("dotenv").config();
 
 
 // To Create A user
@@ -137,7 +138,7 @@ router.post('/findFreeUser', fetchuser, async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: "Internal server error", usersAvailables: false });
   }
 });
 
@@ -153,46 +154,247 @@ router.post('/findFreeUser', fetchuser, async (req, res) => {
 //   }
 // })
 
-router.put("/updateDisconnect", fetchuser, async (req, res) => {
-  let userId = req.user;
+router.put("/updateDisconnect", async (req, res) => {
+  let socketId = req.body.socketId
   try {
-    await User.findByIdAndUpdate(userId, { isFree: false, isOnline: false, isOffline: true });
-    res.json({ message: "Disconnected",success:"true  " }).status(200)
+    await User.findOneAndUpdate({socketId: socketId}, { isFree: false, isOnline: false, isOffline: true });
+    res.json({ message: "Disconnected",success:"true" }).status(200)
   } catch (error) {
     console.log(error);
     res.json({ message: "Error while updating offline status" }).status(500);
   }
 })
 
-
 router.post("/makeFriend", fetchuser, async (req, res) => {
   let userId = req.user;
-  let secondUsersocketId = req.body.current_connection
+  const secondUsersocketId = req.body.current_connection;
   try {
     const firstUser = await User.findById(userId);
     const secondUser = await User.findOne({ socketId: secondUsersocketId });
-    
-    if(firstUser.friends.includes(secondUser._id)){
-      return res.json({message: "Friend Already exist."})
+
+    if (firstUser.friends.includes(secondUser._id)) {
+      return res.json({ message: "Friend already exists." });
     }
 
-    if(secondUser.friends.includes(firstUser._id)){
-      return res.json({message: "Friend Already exist."})
+    if (secondUser.friends.includes(firstUser._id)) {
+      return res.json({ message: "Friend already exists." });
     }
-    let ress = await User.findByIdAndUpdate(userId, { $push: { friends: secondUser._id } }, { new: true });
-    const ress2 = await User.findByIdAndUpdate(secondUser._id, { $push: { friends: firstUser._id } }, { new: true });
-    if (!ress) {
-      res.json({ message: "There is an error" })
+
+    const updatedFirstUser = await User.findByIdAndUpdate(
+      userId,
+      { $push: { friends: secondUser._id } },
+      { new: true }
+    );
+
+    const updatedSecondUser = await User.findByIdAndUpdate(
+      secondUser._id,
+      { $push: { friends: firstUser._id } },
+      { new: true }
+    );
+
+    if (!updatedFirstUser || !updatedSecondUser) {
+      return res.json({ message: "There was an error" });
     }
-    if (!ress2) {
-      res.json({ message: "There is an error" })
-    }
-    return res.json({ message: "You are now friends... Enjoy", success: true })
+
+    // Calculate the expiration timestamp for the timer
+    const timerExpiration = Date.now() + TWO_DAYS_IN_MILLISECONDS;
+
+    // Store the timer expiration timestamp in both users' documents
+    await User.findByIdAndUpdate(userId, { $set: { friendTimerExpires: timerExpiration } });
+    await User.findByIdAndUpdate(secondUser._id, { $set: { friendTimerExpires: timerExpiration } });
+
+    setTimeout(async () => {
+      const firstUserAfterTimeout = await User.findById(userId);
+      const secondUserAfterTimeout = await User.findById(secondUser._id);
+
+      if (
+        firstUserAfterTimeout.friendTimerExpires <= Date.now() ||
+        secondUserAfterTimeout.friendTimerExpires <= Date.now()
+      ) {
+        // Remove users from each other's friends arrays
+        await User.findByIdAndUpdate(userId, { $pull: { friends: secondUser._id } });
+        await User.findByIdAndUpdate(secondUser._id, { $pull: { friends: userId } });
+      }
+    }, TWO_DAYS_IN_MILLISECONDS);
+
+    return res.json({
+      message: "You are now friends... Enjoy",
+      success: true,
+      friendTimerExpires: timerExpiration
+    });
   } catch (error) {
-    console.log(error)
+    console.log(error);
+    res.status(500).json({ error: "Error making friends" });
+  }
+});
+
+// router.post("/makeFriend", fetchuser, async (req, res) => {
+//   let userId = req.user;
+//   let secondUsersocketId = req.body.current_connection
+//   try {
+//     const firstUser = await User.findById(userId);
+//     const secondUser = await User.findOne({ socketId: secondUsersocketId });
+    
+//     if(firstUser.friends.includes(secondUser._id)){
+//       return res.json({message: "Friend Already exist."})
+//     }
+
+//     if(secondUser.friends.includes(firstUser._id)){
+//       return res.json({message: "Friend Already exist."})
+//     }
+//     let ress = await User.findByIdAndUpdate(userId, { $push: { friends: secondUser._id } }, { new: true });
+//     const ress2 = await User.findByIdAndUpdate(secondUser._id, { $push: { friends: firstUser._id } }, { new: true });
+//     if (!ress) {
+//       res.json({ message: "There is an error" })
+//     }
+//     if (!ress2) {
+//       res.json({ message: "There is an error" })
+//     }
+//     return res.json({ message: "You are now friends... Enjoy", success: true })
+//   } catch (error) {
+//     console.log(error)
+//   }
+// })
+
+router.post("/getFriend", fetchuser, async (req, res) => {
+  let userId = req.user;
+  try {
+    const firstUser = await User.findById(userId);
+    
+    const friendsCount = firstUser.friends.length;
+    const friendUsernames = [];
+
+    for (const friendId of firstUser.friends) {
+      const friend = await User.findById(friendId);
+      if (friend) {
+        friendUsernames.push(friend.username);
+      }
+    }
+
+    res.json({ friendsCount: friendsCount, friendUsernames: friendUsernames });
+    
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Error fetching friends" });
+  }
+});
+
+
+
+// Sending a Link to user email to reset password
+router.post('/sendLink', async (req, res) => {
+  const email = req.body.email;
+
+  if (!email) {
+    res.status(401).json({ status: 401, message: "Enter your email" });
+  }
+  else {
+
+    try {
+      const ans = await User.findOne({ "email": email });
+      if (ans) {
+        const token = jwt.sign({ _id: ans.id }, Signature, {
+          expiresIn: '300s'
+        });
+        console.log(token);
+        res.status(200).json(ans);
+
+        const setUserToken = await User.findByIdAndUpdate({ _id: ans.id }, { verify_token: token }, { new: true })
+
+
+        // Set up a nodemailer SMTP transporter with your email credentials
+        const transporter = nodemailer.createTransport({
+          service: 'gmail',
+          port: 25,
+          secure: false,
+          auth: {
+            user: process.env.EMAIL,
+            pass: process.env.PASSWORD
+          }
+        });
+
+        const message = {
+          from: 'Zomaggy',
+          to: email,
+          subject: 'Password Reset Link',
+          text: `Click the following link to reset your password: https://zomaggy-383610.web.app/Resetpassword/${ans.id}/${token}`,
+          html: `<body>
+          <div class='parentpass'>
+          <div class='passcont' style="padding: 10px 30px 10px 30px;background: beige;">
+          <p>Dear ${ans.name} <br>
+          We just received a request to reset your password. This link will take you to the password reset page, and you can proceed from there.
+          If you did not attempt to reset your password, please ignore this email. No changes will be made to your login information.
+          Click the following link to reset your password:</p>
+          <a href="https://zomaggy-383610.web.app/Resetpassword/${ans.id}/${token}"> Reset Password</a><br> 
+          <b><p>Note: This link is valid for only 5 minutes</p></b></body> <br></div>
+          </div>
+          Thank You`
+        };
+
+
+        // Send the email with nodemailer
+        transporter.sendMail(message, (error, info) => {
+          if (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Error sending email' });
+          } else {
+            console.log('Email sent: ', info.response);
+            res.status(200).json(ans);
+          }
+        });
+
+        console.log(setUserToken);
+
+
+      }
+      else {
+        res.status(401).send({ "message": "User not found", "success": false });
+      }
+
+    } catch (error) {
+      console.error(error);
+    }
   }
 })
 
+// Route to change password
+router.put('/changePass/:id/:token', async (req, res) => {
+  try {
+    const { id, token } = req.params;
 
+    // Check for valid user and token
+    const validUser = await User.findOne({ _id: id, verify_token: token });
+
+    if (!validUser) {
+      res.status(401).send({ message: 'Invalid User or Token' });
+      return;
+    }
+
+    // Verify token
+    let decodedToken;
+    try {
+      decodedToken = jwt.verify(token, Signature);
+    } catch (error) {
+      res.status(401).send({ message: 'Authentication failed!' });
+      return;
+    }
+
+    const { pass } = req.body;
+    const saltRounds = await bcrypt.genSalt(10);
+    const secPass = await bcrypt.hash(pass, saltRounds);
+
+    const response = await User.findByIdAndUpdate(id, { pass: secPass });
+
+    if (response) {
+      res.status(200).send({ message: 'Password Changed successfully' });
+      console.log('Password Changed Successfully');
+    } else {
+      res.status(500).send({ message: 'Error while changing password' });
+      console.log('Problem while changing pass');
+    }
+  } catch (error) {
+    console.log(error);
+  }
+});
 
 module.exports = router;

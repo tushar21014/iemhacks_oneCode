@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import '../styles/login.css'
 import { Link } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom';
-
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 const Login = () => {
   const [value, setValue] = useState('')
   const [credentials, setCredentials] = useState({ email: "", pass: "" });
@@ -48,7 +49,9 @@ const Login = () => {
   const onChange = (e) => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value })
   }
-
+  useEffect(() => {
+    AOS.init({ duration: 1000, });
+}, [])
   return (
 
     <section>
@@ -65,11 +68,11 @@ const Login = () => {
             <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label htmlFor="exampleInputEmail1">Email address</label>
-                <input type="email" className="form-control" id="exampleInputEmail1" name='email' value={credentials.email} aria-describedby="emailHelp" onChange={onChange} placeholder="Enter email" />
+                <input type="email" className="form-control" id="exampleInputEmail1" name='email' required value={credentials.email} aria-describedby="emailHelp" onChange={onChange} placeholder="Enter email" />
               </div>
               <div className="form-group">
                 <label htmlFor="exampleInputPassword1">Password</label>
-                <input type="password" className="form-control" id="pass" value={credentials.pass} name='pass' onChange={onChange} placeholder="Password" />
+                <input type="password" className="form-control" id="pass" value={credentials.pass} required name='pass' onChange={onChange} placeholder="Password" />
               </div>
               <div className="form-check">
                 <input type="checkbox" className="form-check-input forgot" onClick={showPass} id="exampleCheck1" />
