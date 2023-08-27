@@ -50,11 +50,10 @@ const Chat = () => {
         }
       })
       let data = await res.json();
-      console.log(data.friendUsernames)
-      setFriends(data.usernames)
+      setFriends(data.friendUsernames)
       console.log("I am friends" + friends)
     } catch (error) {
-      
+      console.log(error)
     }
   }
   const send = () => {
