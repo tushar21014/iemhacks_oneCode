@@ -1,5 +1,5 @@
 # iemhacks_oneCode
-
+![OnlyUs](https://github.com/tushar21014/iemhacks_oneCode/blob/master/Frontend/public/logo192.png?raw=true)
 ## **Team One Code**
 
 - **Team Leader:** Tushar Gupta
