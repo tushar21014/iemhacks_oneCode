@@ -3,6 +3,7 @@
 ## **Team One Code**
 
 - **Team Leader:** Tushar Gupta
+- **Contributor:** Rahul Sahani 
 - **Team Support:** Samanpreet Singh
 - **Team Frontend:** Manjay Lal Patel
 
@@ -25,6 +26,10 @@ Existing social media platforms have inadvertently led to undue social stress by
 ## **Setup Instructions**
 
 Follow these steps to get your development environment up and running:
+
+### **Server ENV Setup**
+1. Navigate to Server Directory.
+2. Create an .env environment file.
 
 ### **Server Setup**
 
