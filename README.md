@@ -29,8 +29,14 @@ Follow these steps to get your development environment up and running:
 
 ### **Server ENV Setup**
 1. Navigate to Server Directory.
-2. Create an .env environment file.
-
+2. Create a .env environment file.
+3. The environment variables should look like this:
+   ```env
+   SERVER_PORT=5004
+   URI = your_mongo_uri
+   JWT_SECRET=secret
+   ```
+   
 ### **Server Setup**
 
 1. Open a terminal window and navigate to the server directory:
